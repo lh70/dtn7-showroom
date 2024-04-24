@@ -24,8 +24,7 @@ from io import BytesIO, StringIO
 # insert here a list of continuous air-temperature data from the same station
 resources_to_parse = [
     '10minutenwerte_TU_00044_20070209_20091231_hist.zip',
-    '10minutenwerte_TU_00044_20100101_20191231_hist.zip',
-    '10minutenwerte_TU_00044_20200101_20221231_hist.zip'
+    '10minutenwerte_TU_00044_20100101_20191231_hist.zip'
 ]
 
 # url to the folder containing the resources
