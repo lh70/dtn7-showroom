@@ -4,7 +4,7 @@ FROM ${ARCH}rust:1.76.0-bullseye as builder
 WORKDIR /root
 RUN rustup component add rustfmt
 RUN git clone https://github.com/dtn7/dtn7-rs  && cd dtn7-rs && \
-    git checkout 02cb223 && \
+    git checkout 3e06609 && \
     cargo install --locked --bins --examples --root /usr/local --path examples && \
     cargo install --locked --bins --examples --root /usr/local --path core/dtn7
 RUN cargo install --locked --bins --examples --root /usr/local dtn7-plus --git https://github.com/dtn7/dtn7-plus-rs  --rev 010202e56 dtn7-plus
@@ -146,3 +146,43 @@ EXPOSE 50051
 EXPOSE 6080
 ENTRYPOINT [ "/entrypoint.sh" ]
 WORKDIR /root
+
+
+# ------------------------------------------------------------------------------
+
+# thesis configuration
+WORKDIR /root
+
+# add openjdk 11
+RUN sudo apt-get update
+RUN sudo apt-get -y install openjdk-11-jdk
+
+# workdir setup
+RUN mkdir /root/temp/
+WORKDIR /root/temp
+
+# sbt setup
+RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
+RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee /etc/apt/sources.list.d/sbt_old.list
+RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add
+RUN sudo apt-get update
+RUN sudo apt-get install sbt
+# first time sbt execution will load one-time sbt dependencies
+RUN sbt exit
+
+# graalvm setup
+RUN wget https://download.oracle.com/graalvm/22/latest/graalvm-jdk-22_linux-x64_bin.tar.gz
+RUN tar -xvzf graalvm-jdk-22_linux-x64_bin.tar.gz
+RUN rm graalvm-jdk-22_linux-x64_bin.tar.gz
+
+# project clone
+RUN git clone https://github.com/lh70/lecture-chat-example.git
+
+# compile native
+WORKDIR /root/temp/lecture-chat-example
+RUN sbt stageJars
+RUN /root/temp/graalvm-jdk-22.0.1+8.1/bin/native-image --class-path /root/temp/lecture-chat-example/jvm/target/jars/"*" dtn.rdt_tool -o /root/.coregui/scripts/rdt_tool --no-fallback --gc=G1 -Ob
+
+
+WORKDIR /root
+

@@ -37,6 +37,11 @@ nodes:
     name: DTN7ZERO
     services:
       - dtn7zero
+  - !CustomNode
+    image: /root/.coregui/icons/dtn-router.png
+    name: CHECKER
+    services:
+      - rdtchecker
 observers: []
 preferences: !PreferencesConfig
   editor: vim
